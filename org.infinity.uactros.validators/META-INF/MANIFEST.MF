@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Validators
+Bundle-SymbolicName: org.infinity.uactros.validators
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.adempiere.base;bundle-version="11.0.0",
+ org.adempiere.plugin.utils;bundle-version="11.0.0",
+ org.infinity.uactros;bundle-version="1.0.0"
+Automatic-Module-Name: org.infinity.uactros.validators
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Service-Component: UAModelValidator.xml

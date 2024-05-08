@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Uactros
+Bundle-SymbolicName: org.infinity.uactros;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.infinity.models
+Require-Bundle: org.eclipse.core.runtime,
+ org.adempiere.base;bundle-version="11.0.0",
+ org.adempiere.plugin.utils;bundle-version="11.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Automatic-Module-Name: org.infinity.uactros
+Bundle-Activator: org.infinity.uactros.Activator
+Service-Component: UADocFactory.xml
