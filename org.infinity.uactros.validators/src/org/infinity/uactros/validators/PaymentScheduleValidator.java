@@ -42,10 +42,10 @@ public class PaymentScheduleValidator implements ModelValidator {
 			int payScheduleID = ips.getC_PaySchedule_ID();
 			MInvoice invoice = new MInvoice(Env.getCtx(), invoiceID, null);
 			int projectID = invoice.getC_Project_ID();
-			if(projectID>0 && payScheduleID>0) {
+			if(projectID>0 && payScheduleID>0) { 
 				MProject project = new MProject(Env.getCtx(), projectID, null);
 				Timestamp contractDate = project.getDateContract();
-				if(contractDate !=null) {
+				if(contractDate !=null) { //Contract Date Should not be NULL
 					MPaySchedule paySchedule = new MPaySchedule(Env.getCtx(), payScheduleID, null);
 					Timestamp dueDate = TimeUtil.addDays(contractDate, paySchedule.getNetDays());
 					ips.setDueDate (dueDate);
