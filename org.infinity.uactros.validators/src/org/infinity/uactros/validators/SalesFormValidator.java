@@ -82,6 +82,7 @@ public class SalesFormValidator implements ModelValidator {
 		order.setM_Warehouse_ID(1000000);
 		order.setM_PriceList_ID(1000001);
 		order.setSalesRep_ID(1000001);
+		order.setC_Project_ID(form.getC_Project_ID());
 		order.setIsSOTrx(true);
 //		order.setPaymentRule("P");
 //		order.setDeliveryRule("B");
@@ -136,6 +137,7 @@ public class SalesFormValidator implements ModelValidator {
 		invoice.setC_BPartner_Location_ID((customer.getLocation(customer.get_ID())).get_ID());
 		invoice.setM_PriceList_ID(1000001);
 		invoice.setSalesRep_ID(1000001);
+		invoice.setC_Project_ID(order.getC_Project_ID());
 		invoice.setPaymentRule("P");
 		invoice.setC_PaymentTerm_ID(form.getC_PaymentTerm_ID()>0?form.getC_PaymentTerm_ID(): 1000000);
 		invoice.setC_Currency_ID(306);
