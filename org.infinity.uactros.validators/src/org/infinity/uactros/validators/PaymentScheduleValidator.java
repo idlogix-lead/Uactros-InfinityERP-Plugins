@@ -50,7 +50,7 @@ public class PaymentScheduleValidator implements ModelValidator {
 					Timestamp dueDate = TimeUtil.addDays(contractDate, paySchedule.getNetDays());
 					ips.setDueDate (dueDate);
 					Timestamp discountDate = TimeUtil.addDays(contractDate, paySchedule.getDiscountDays());
-					ips.setDiscountDate (discountDate);
+					ips.setDiscountDate (discountDate);//
 				}
 				
 			}
