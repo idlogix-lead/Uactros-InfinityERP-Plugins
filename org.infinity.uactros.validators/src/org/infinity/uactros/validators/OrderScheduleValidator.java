@@ -40,13 +40,13 @@ public class OrderScheduleValidator implements ModelValidator {
 			MOrderPaySchedule ops = (MOrderPaySchedule)po;
 			int orderID =ops.getC_Order_ID();
 			int payScheduleID = ops.getC_PaySchedule_ID();
-			MOrder order = new MOrder(Env.getCtx(), orderID, null);
+			MOrder order = new MOrder(po.getCtx(), orderID, po.get_TrxName());
 			int projectID = order.getC_Project_ID();
 			if(projectID>0 && payScheduleID>0) {
-				MProject project = new MProject(Env.getCtx(), projectID, null);
+				MProject project = new MProject(po.getCtx(), projectID, po.get_TrxName());
 				Timestamp contractDate = project.getDateContract();
 				if(contractDate !=null) {//Contract date should not be null
-					MPaySchedule paySchedule = new MPaySchedule(Env.getCtx(), payScheduleID, null);
+					MPaySchedule paySchedule = new MPaySchedule(po.getCtx(), payScheduleID, po.get_TrxName());
 					Timestamp dueDate = TimeUtil.addDays(contractDate, paySchedule.getNetDays());
 					ops.setDueDate (dueDate);
 					Timestamp discountDate = TimeUtil.addDays(contractDate, paySchedule.getDiscountDays());
