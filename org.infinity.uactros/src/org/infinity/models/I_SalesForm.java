@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for SalesForm
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_SalesForm 
@@ -106,6 +106,21 @@ public interface I_SalesForm
 	public int getC_BPartner_ID();
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
+
+    /** Column name C_Buyer_ID */
+    public static final String COLUMNNAME_C_Buyer_ID = "C_Buyer_ID";
+
+	/** Set Buyer.
+	  * Define Buyer Profile
+	  */
+	public void setC_Buyer_ID (int C_Buyer_ID);
+
+	/** Get Buyer.
+	  * Define Buyer Profile
+	  */
+	public int getC_Buyer_ID();
+
+	public I_C_Buyer getC_Buyer() throws RuntimeException;
 
     /** Column name C_DocType_ID */
     public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
@@ -277,10 +292,10 @@ public interface I_SalesForm
     /** Column name Form_No */
     public static final String COLUMNNAME_Form_No = "Form_No";
 
-	/** Set Form_No	  */
+	/** Set Form No	  */
 	public void setForm_No (String Form_No);
 
-	/** Get Form_No	  */
+	/** Get Form No	  */
 	public String getForm_No();
 
     /** Column name IsActive */
@@ -308,6 +323,19 @@ public interface I_SalesForm
 	  * Indicates if this document requires approval
 	  */
 	public boolean isApproved();
+
+    /** Column name IsSOTrx */
+    public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
+
+	/** Set Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx);
+
+	/** Get Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public boolean isSOTrx();
 
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";

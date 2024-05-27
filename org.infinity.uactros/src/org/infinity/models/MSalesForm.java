@@ -3,13 +3,17 @@ package org.infinity.models;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Env;
 
 @org.adempiere.base.Model(table="SalesForm")
 public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
@@ -140,6 +144,28 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 		}
 
 		return index;
+	}
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord) {
+		
+		if (is_ValueChanged(MSalesForm.COLUMNNAME_C_Buyer_ID)) {
+			List<MSalesFormOwner> owners = new Query(Env.getCtx(),MSalesFormOwner.Table_Name, " Current_Owner  ='Y' ", null)
+    				.list();
+            for(MSalesFormOwner obj:owners) {
+            	obj.setCurrent_Owner(false);
+            	obj.save();
+            }
+            MSalesFormOwner owner = new MSalesFormOwner(getCtx(), 0, get_TrxName());
+            owner.setSalesForm_ID(get_ID());
+            owner.setSalesForm_Owner_ID(getSalesForm_ID());
+            owner.setC_Buyer_ID(getC_Buyer_ID());
+            owner.setAD_Org_ID(getAD_Org_ID());
+            owner.setCurrent_Owner(true);
+            owner.saveEx();      
+        }
+		
+		return super.beforeSave(newRecord);
 	}
 
 
