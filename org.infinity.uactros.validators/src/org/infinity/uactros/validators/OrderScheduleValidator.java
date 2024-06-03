@@ -1,8 +1,10 @@
 package org.infinity.uactros.validators;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.compiere.model.MClient;
+import org.compiere.model.MInvoicePaySchedule;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MPaySchedule;
@@ -10,6 +12,7 @@ import org.compiere.model.MProject;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 
@@ -39,6 +42,12 @@ public class OrderScheduleValidator implements ModelValidator {
 		if(po.get_TableName().equals(MOrderPaySchedule.Table_Name) && type==TYPE_BEFORE_NEW) {
 			MOrderPaySchedule ops = (MOrderPaySchedule)po;
 			int orderID =ops.getC_Order_ID();
+			List<MOrderPaySchedule> list = new Query(Env.getCtx(), MOrderPaySchedule.Table_Name, "  c_order_id = ? ", po.get_TrxName())
+					.setParameters(orderID).setOrderBy(" created")
+					.list();
+			if(list.size()<=0) {
+				return null;
+			}
 			int payScheduleID = ops.getC_PaySchedule_ID();
 			MOrder order = new MOrder(po.getCtx(), orderID, po.get_TrxName());
 			int projectID = order.getC_Project_ID();
