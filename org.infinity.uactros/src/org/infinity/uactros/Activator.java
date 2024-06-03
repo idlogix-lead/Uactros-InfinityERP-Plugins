@@ -18,6 +18,7 @@ public class Activator implements BundleActivator {
 		Core.getMappedModelFactory().scan(context, "org.infinity.models");
 	}
 
+
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 	}
