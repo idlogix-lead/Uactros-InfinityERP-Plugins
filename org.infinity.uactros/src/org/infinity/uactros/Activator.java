@@ -16,7 +16,6 @@ public class Activator implements BundleActivator {
 		Activator.context = bundleContext;
 		Core.getMappedProcessFactory().scan(context, "org.infinity.processes");
 		Core.getMappedModelFactory().scan(context, "org.infinity.models");
-		Core.getMappedColumnCalloutFactory().scan(context, "org.infinity.callouts");
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
