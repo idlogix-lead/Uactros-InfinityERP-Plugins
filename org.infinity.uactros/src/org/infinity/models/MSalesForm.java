@@ -7,16 +7,18 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MOrder;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
+import org.compiere.model.MInvoice;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.Env;
 
 @org.adempiere.base.Model(table="SalesForm")
-public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
+public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {	
 
 	public MSalesForm(Properties ctx, int SalesForm_ID, String trxName) {
 		super(ctx, SalesForm_ID, trxName);
@@ -86,8 +88,32 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 	@Override
 	public boolean reActivateIt() {
 		// TODO Auto-generated method stub
+		
+		int orderID = getC_Order_ID();
+		MOrder myorder = new MOrder(p_ctx, orderID, null);
+		
+		int invoiceID = getC_Invoice_ID();
+		MInvoice myinvoice = new MInvoice(p_ctx, invoiceID, null);
+		
+		if (myorder.processIt("VO") )	
+	{
+			myorder.saveEx();
+		} else {
+			throw new IllegalStateException("Order Process Failed: " + myorder + " - " + myorder.getProcessMsg());
+			
+		}
+		if (myinvoice.processIt("RC"))
+		{
+			myinvoice.saveEx();
+		} else {
+			throw new IllegalStateException("invoice Process Failed: " + myinvoice + " - " + myinvoice.getProcessMsg());
+			
+		}
+				
 		return true;
 	}
+	
+	
 	@Override
 	public String getSummary() {
 		// TODO Auto-generated method stub
