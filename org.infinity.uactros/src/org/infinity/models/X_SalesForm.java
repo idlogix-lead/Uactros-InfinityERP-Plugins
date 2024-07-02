@@ -26,7 +26,7 @@ import org.compiere.util.Env;
 
 /** Generated Model for SalesForm
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="SalesForm")
 public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 {
@@ -34,7 +34,7 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240308L;
+	private static final long serialVersionUID = 20240527L;
 
     /** Standard Constructor */
     public X_SalesForm (Properties ctx, int SalesForm_ID, String trxName)
@@ -52,6 +52,8 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 			setDocumentNo (null);
 			setIsApproved (false);
 // N
+			setIsSOTrx (true);
+// Y
 			setName (null);
 			setProcessed (false);
 // N
@@ -76,6 +78,8 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 			setDocumentNo (null);
 			setIsApproved (false);
 // N
+			setIsSOTrx (true);
+// Y
 			setName (null);
 			setProcessed (false);
 // N
@@ -100,6 +104,8 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 			setDocumentNo (null);
 			setIsApproved (false);
 // N
+			setIsSOTrx (true);
+// Y
 			setName (null);
 			setProcessed (false);
 // N
@@ -124,6 +130,8 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 			setDocumentNo (null);
 			setIsApproved (false);
 // N
+			setIsSOTrx (true);
+// Y
 			setName (null);
 			setProcessed (false);
 // N
@@ -238,6 +246,34 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 		return ii.intValue();
 	}
 
+	public I_C_Buyer getC_Buyer() throws RuntimeException
+	{
+		return (I_C_Buyer)MTable.get(getCtx(), I_C_Buyer.Table_ID)
+			.getPO(getC_Buyer_ID(), get_TrxName());
+	}
+
+	/** Set Buyer.
+		@param C_Buyer_ID Define Buyer Profile
+	*/
+	public void setC_Buyer_ID (int C_Buyer_ID)
+	{
+		if (C_Buyer_ID < 1)
+			set_Value (COLUMNNAME_C_Buyer_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Buyer_ID, Integer.valueOf(C_Buyer_ID));
+	}
+
+	/** Get Buyer.
+		@return Define Buyer Profile
+	  */
+	public int getC_Buyer_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Buyer_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -250,9 +286,9 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
 		if (C_DocType_ID < 0)
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
+			set_Value (COLUMNNAME_C_DocType_ID, null);
 		else
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
@@ -543,16 +579,16 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
-	/** Set Form_No.
-		@param Form_No Form_No
+	/** Set Form No.
+		@param Form_No Form No
 	*/
 	public void setForm_No (String Form_No)
 	{
 		set_Value (COLUMNNAME_Form_No, Form_No);
 	}
 
-	/** Get Form_No.
-		@return Form_No	  */
+	/** Get Form No.
+		@return Form No	  */
 	public String getForm_No()
 	{
 		return (String)get_Value(COLUMNNAME_Form_No);
@@ -572,6 +608,29 @@ public class X_SalesForm extends PO implements I_SalesForm, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Transaction.
+		@param IsSOTrx This is a Sales Transaction
+	*/
+	public void setIsSOTrx (boolean IsSOTrx)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+	}
+
+	/** Get Sales Transaction.
+		@return This is a Sales Transaction
+	  */
+	public boolean isSOTrx()
+	{
+		Object oo = get_Value(COLUMNNAME_IsSOTrx);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)
