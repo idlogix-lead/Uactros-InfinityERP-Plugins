@@ -109,6 +109,7 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 			throw new IllegalStateException("invoice Process Failed: " + myinvoice + " - " + myinvoice.getProcessMsg());
 			
 		}
+		setProcessed(false);
 				
 		return true;
 	}
