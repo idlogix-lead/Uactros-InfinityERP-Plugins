@@ -24,7 +24,7 @@ import org.compiere.model.*;
 
 /** Generated Model for C_Buyer
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_Buyer")
 public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
 {
@@ -32,7 +32,7 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240527L;
+	private static final long serialVersionUID = 20240820L;
 
     /** Standard Constructor */
     public X_C_Buyer (Properties ctx, int C_Buyer_ID, String trxName)
@@ -40,6 +40,8 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
       super (ctx, C_Buyer_ID, trxName);
       /** if (C_Buyer_ID == 0)
         {
+			setAD_User_ID (0);
+// -99
 			setC_Buyer_ID (0);
         } */
     }
@@ -50,6 +52,8 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
       super (ctx, C_Buyer_ID, trxName, virtualColumns);
       /** if (C_Buyer_ID == 0)
         {
+			setAD_User_ID (0);
+// -99
 			setC_Buyer_ID (0);
         } */
     }
@@ -60,6 +64,8 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
       super (ctx, C_Buyer_UU, trxName);
       /** if (C_Buyer_UU == null)
         {
+			setAD_User_ID (0);
+// -99
 			setC_Buyer_ID (0);
         } */
     }
@@ -70,6 +76,8 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
       super (ctx, C_Buyer_UU, trxName, virtualColumns);
       /** if (C_Buyer_UU == null)
         {
+			setAD_User_ID (0);
+// -99
 			setC_Buyer_ID (0);
         } */
     }
@@ -136,9 +144,9 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
 	public void setAD_User_ID (int AD_User_ID)
 	{
 		if (AD_User_ID < 1)
-			set_Value (COLUMNNAME_AD_User_ID, null);
+			set_ValueNoCheck (COLUMNNAME_AD_User_ID, null);
 		else
-			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+			set_ValueNoCheck (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
 	}
 
 	/** Get User/Contact.
@@ -166,34 +174,6 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
 	public Timestamp getBirthday()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_Birthday);
-	}
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_BPartner_ID(), get_TrxName());
-	}
-
-	/** Set Business Partner.
-		@param C_BPartner_ID Identifies a Business Partner
-	*/
-	public void setC_BPartner_ID (int C_BPartner_ID)
-	{
-		if (C_BPartner_ID < 1)
-			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else
-			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
-	}
-
-	/** Get Business Partner.
-		@return Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Buyer.
@@ -658,5 +638,24 @@ public class X_C_Buyer extends PO implements I_C_Buyer, I_Persistent
 	public String getUserAddress2()
 	{
 		return (String)get_Value(COLUMNNAME_UserAddress2);
+	}
+
+	/** Set User ID.
+		@param UserID User ID or account number
+	*/
+	public void setUserID (int UserID)
+	{
+		set_ValueNoCheck (COLUMNNAME_UserID, Integer.valueOf(UserID));
+	}
+
+	/** Get User ID.
+		@return User ID or account number
+	  */
+	public int getUserID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_UserID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

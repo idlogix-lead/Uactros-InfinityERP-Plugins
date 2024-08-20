@@ -1,12 +1,9 @@
 package org.infinity.models;
 
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.X_AD_User;
-import org.compiere.model.MImage;
 import org.compiere.model.MUser;
 import org.compiere.util.EMail;
 
@@ -34,6 +31,11 @@ public class MBuyer extends X_C_Buyer {
 
     @Override
     protected boolean beforeSave(boolean newRecord) {
+    	
+    	
+    	if(newRecord)
+    		setAD_User_ID(0);
+    	
         String email = getEMail();
         String nationalCode = getNationalCode();
         
@@ -44,36 +46,28 @@ public class MBuyer extends X_C_Buyer {
             throw new AdempiereException("National Code is required");
         }
 
-        if (is_ValueChanged(MBuyer.COLUMNNAME_NationalCode)) {
-            String oldName = (String) get_ValueOld(MBuyer.COLUMNNAME_NationalCode);
-            MUser existingUser = MUser.get(getCtx(), oldName);
-            if (existingUser != null) {
-                existingUser.setName(nationalCode);
-                existingUser.setPassword(nationalCode);
-                existingUser.saveEx();
-            }
-        }
+       
+        MUser user = null;
+        if(getAD_User_ID()>0)
+        	user = new MUser(this.getCtx(), getAD_User_ID(), this.get_TrxName());
+        else 
+        	user = new MUser(getCtx(), 0, get_TrxName());
 
-        if (newRecord) {
-            MUser existingUser = MUser.get(getCtx(), nationalCode);
-            if (existingUser != null) {
-            	return true;
-            }
-
-			MUser user = new MUser(getCtx(), 0, get_TrxName());
             user.setDescription(getName());
             user.setEMail(email);
             user.setPassword(nationalCode);
-            user.setName(nationalCode);
+            user.setName(getName());
             user.setBirthday(getBirthday());
             user.setPhone(getPhone());
             user.setPhone2(getPhone2());
             user.setAD_Image_ID(getAD_Image_ID());
-            user.setC_BPartner_ID(getC_BPartner_ID());
-            setAD_User_ID(user.getAD_User_ID());
             user.saveEx();
-        }
+            setAD_User_ID(user.getAD_User_ID());
+           
+        
 
         return super.beforeSave(newRecord);
     }
+    
+    
 }

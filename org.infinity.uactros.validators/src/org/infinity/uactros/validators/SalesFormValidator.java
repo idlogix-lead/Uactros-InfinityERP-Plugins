@@ -1,5 +1,6 @@
 package org.infinity.uactros.validators;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import org.adempiere.base.Core;
@@ -49,23 +50,17 @@ public class SalesFormValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing) {
 		// TODO Auto-generated method stub
-		if(po.get_Table_ID()==MSalesForm.Table_ID && timing == TIMING_BEFORE_COMPLETE) {
+		  System.out.println("docValidate called for Table ID: " + po.get_Table_ID() + " and Timing: " + timing);
+		  
+		
+		if(po.get_Table_ID()==MSalesForm.Table_ID && timing == TIMING_AFTER_REACTIVATE) {
 			MSalesForm form = (MSalesForm) po;
-			if(form.getM_Product_ID()>0 && form.getC_BPartner_ID()>0) {
-				MBPartner customer = (MBPartner) form.getC_BPartner();
-				MProduct product = (MProduct) form.getM_Product();
-				try {
-					createOrder(form,customer,product);
-				} catch (Exception e) {
-					throw e;
-				}
-				
-				
-				
-				
-			}
 			
-			
+		form.setDocStatus("DR");
+		form.saveEx();
+		
+		System.out.println(form.getDocStatus());
+		
 		}
 		return null;
 	}
@@ -115,15 +110,13 @@ public class SalesFormValidator implements ModelValidator {
 			
 		}
 		try {
-			createInvoice(form,customer,product,order);
+//			createInvoice(form,customer,product);
 		} catch (Exception e) {
 			throw e;
 		}
 		
 	}
-	void createInvoice(MSalesForm form,MBPartner customer,MProduct product,MOrder order) {
-		
-		
+	void createInvoice(MSalesForm form,MBPartner customer) {
 		
 		MInvoice invoice =  new MInvoice(Env.getCtx(),0,form.get_TrxName());
 		invoice.setAD_Org_ID(form.getAD_Org_ID());
@@ -137,27 +130,40 @@ public class SalesFormValidator implements ModelValidator {
 		invoice.setC_BPartner_Location_ID((customer.getLocation(customer.get_ID())).get_ID());
 		invoice.setM_PriceList_ID(1000001);
 		invoice.setSalesRep_ID(1000001);
-		invoice.setC_Project_ID(order.getC_Project_ID());
+		invoice.setC_Project_ID(form.getC_Project_ID());
 		invoice.setPaymentRule("P");
 		invoice.setC_PaymentTerm_ID(form.getC_PaymentTerm_ID()>0?form.getC_PaymentTerm_ID(): 1000000);
 		invoice.setC_Currency_ID(306);
 		invoice.set_ValueOfColumn("SalesForm_ID", form.getSalesForm_ID());
-		invoice.setOrder(order);
+//		invoice.setOrder(order);
 		invoice.save();
 		form.setC_Invoice_ID(invoice.get_ID());
 		
 		
-		for(MOrderLine oline: order.getLines()){
-			MInvoiceLine line = new MInvoiceLine(Env.getCtx(), 0, form.get_TrxName());
-			line.setOrderLine(oline);
+//		for(MOrderLine oline: order.getLines()){
+//			line.setOrderLine(oline);
+//			line.setM_Product_ID(oline.getM_Product_ID());
+//			line.setQty(oline.getQtyOrdered());
+	
+		MInvoiceLine line = new MInvoiceLine(Env.getCtx(), 0, form.get_TrxName());
 			line.setInvoice(invoice);
 			line.setAD_Org_ID(invoice.getAD_Org_ID());
-			line.setM_Product_ID(oline.getM_Product_ID());
-			line.setQty(oline.getQtyOrdered());
-			setLinePricing(line);
 			line.setC_Invoice_ID(invoice.get_ID());
+			line.setQty(Env.ONE);
+			BigDecimal PriceEntered= (BigDecimal) form.get_Value("priceactual");
+			
+			 if (form.getM_Product_ID() > 0) {
+		            line.setM_Product_ID(form.getM_Product_ID());
+		            setLinePricing(line);
+		        } else {
+		            line.setC_Charge_ID(form.get_ValueAsInt("C_Charge_ID"));
+		            line.setPriceActual(PriceEntered);
+		            line.setPriceEntered(PriceEntered);
+		            line.setPriceList(PriceEntered);
+
+		        }
 			line.save();
-		}
+//		}
 		if(invoice==null || invoice.getC_Invoice_ID()<=0 )
 			return;
 			invoice.setDocAction("CO");
@@ -167,7 +173,7 @@ public class SalesFormValidator implements ModelValidator {
 			invoice.saveEx();
 			
 		} else {
-			throw new IllegalStateException("invoice Process Failed: " + invoice + " - " + invoice.getProcessMsg());
+			throw new IllegalStateException("Invoice Process Failed: " + invoice + " - " + invoice.getProcessMsg());
 			
 		}
 		

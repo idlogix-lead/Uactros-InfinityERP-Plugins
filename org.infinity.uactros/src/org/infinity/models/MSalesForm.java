@@ -7,14 +7,22 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
-import org.compiere.model.MOrder;
+import org.adempiere.base.Core;
+import org.adempiere.base.IProductPricing;
+import org.adempiere.base.event.annotations.doc.AfterReactivate;
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MBPartner;
+import org.compiere.model.MDocType;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
-import org.compiere.model.MInvoice;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 @org.adempiere.base.Model(table="SalesForm")
@@ -61,7 +69,19 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 	}
 	@Override
 	public String completeIt() {
-		ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
+
+		int SalesformId= getSalesForm_ID();
+		MSalesForm form = new MSalesForm(getCtx(), SalesformId, get_TrxName());
+		
+		if(form.get_ID()>0 && form.getC_BPartner_ID()>0) {
+			MBPartner customer = (MBPartner) form.getC_BPartner();
+			try {
+				createInvoice(form,customer);
+			} catch (Exception e) {
+				throw e;
+			}
+			}
+		
 		setProcessed(true);
 		return DocAction.STATUS_Completed;
 	}
@@ -87,21 +107,10 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 	}
 	@Override
 	public boolean reActivateIt() {
-		// TODO Auto-generated method stub
-		
-		int orderID = getC_Order_ID();
-		MOrder myorder = new MOrder(p_ctx, orderID, null);
-		
+		ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_REACTIVATE);
 		int invoiceID = getC_Invoice_ID();
 		MInvoice myinvoice = new MInvoice(p_ctx, invoiceID, null);
 		
-		if (myorder.processIt("VO") )	
-	{
-			myorder.saveEx();
-		} else {
-			throw new IllegalStateException("Order Process Failed: " + myorder + " - " + myorder.getProcessMsg());
-			
-		}
 		if (myinvoice.processIt("RC"))
 		{
 			myinvoice.saveEx();
@@ -109,11 +118,14 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 			throw new IllegalStateException("invoice Process Failed: " + myinvoice + " - " + myinvoice.getProcessMsg());
 			
 		}
+		setC_Invoice_ID(0);
 		setProcessed(false);
+		setDocStatus(STATUS_Drafted);
+		 saveEx();
+		System.out.println(getDocStatus());
 				
 		return true;
 	}
-	
 	
 	@Override
 	public String getSummary() {
@@ -196,4 +208,108 @@ public class MSalesForm extends X_SalesForm implements DocAction ,DocOptions  {
 	}
 
 
+void createInvoice(MSalesForm form,MBPartner customer) {
+		
+		MInvoice invoice =  new MInvoice(Env.getCtx(),0,form.get_TrxName());
+		invoice.setAD_Org_ID(form.getAD_Org_ID());
+		invoice.setIsSOTrx(true);
+		invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
+		invoice.setDateInvoiced((new Timestamp(System.currentTimeMillis())));
+		invoice.setDateAcct((new Timestamp(System.currentTimeMillis())));
+		invoice.setC_BPartner_ID(form.getC_BPartner_ID());
+		if(customer.getLocation(customer.get_ID())==null)
+			throw new AdempiereException("Open Customer Location First then complete form!");
+		invoice.setC_BPartner_Location_ID((customer.getLocation(customer.get_ID())).get_ID());
+		invoice.setM_PriceList_ID(1000001);
+		invoice.setSalesRep_ID(1000001);
+		invoice.setC_Project_ID(form.getC_Project_ID());
+		invoice.setPaymentRule("P");
+		invoice.setC_PaymentTerm_ID(form.getC_PaymentTerm_ID()>0?form.getC_PaymentTerm_ID(): 1000000);
+		invoice.setC_Currency_ID(306);
+		invoice.set_ValueOfColumn("SalesForm_ID", form.getSalesForm_ID());
+//		invoice.setOrder(order);
+		invoice.save();
+		setC_Invoice_ID(invoice.get_ID());		
+		
+		
+//		for(MOrderLine oline: order.getLines()){
+//			line.setOrderLine(oline);
+//			line.setM_Product_ID(oline.getM_Product_ID());
+//			line.setQty(oline.getQtyOrdered());
+	
+		MInvoiceLine line = new MInvoiceLine(Env.getCtx(), 0, form.get_TrxName());
+			line.setInvoice(invoice);
+			line.setAD_Org_ID(invoice.getAD_Org_ID());
+			line.setC_Invoice_ID(invoice.get_ID());
+			line.setQty(Env.ONE);
+			BigDecimal PriceEntered= (BigDecimal) form.get_Value("priceactual");
+			
+			 if (form.getM_Product_ID() > 0) {
+		            line.setM_Product_ID(form.getM_Product_ID());
+		            setLinePricing(line);
+		        } else {
+		            line.setC_Charge_ID(form.get_ValueAsInt("C_Charge_ID"));
+		            line.setPriceActual(PriceEntered);
+		            line.setPriceEntered(PriceEntered);
+		            line.setPriceList(PriceEntered);
+
+		        }
+			line.save();
+//		}
+		if(invoice==null || invoice.getC_Invoice_ID()<=0 )
+			return;
+			invoice.setDocAction("CO");
+			
+		if (invoice.processIt("CO"))
+		{
+			invoice.saveEx();
+			
+		} else {
+			throw new IllegalStateException("Invoice Process Failed: " + invoice + " - " + invoice.getProcessMsg());
+			
+		}
+		
+	}
+
+
+void setLinePricing(MInvoiceLine iline) {
+	
+	MInvoice invoice = (MInvoice)iline.getC_Invoice();
+	MBPartner customer = (MBPartner) invoice.getC_BPartner();
+	MProduct product = (MProduct) iline.getProduct();
+	
+	IProductPricing pp = Core.getProductPricing();
+	pp.setInitialValues(product.getM_Product_ID(), customer.getC_BPartner_ID(), Env.ONE,true, null);
+	Timestamp invoiceDate = (Timestamp)invoice.getDateInvoiced();
+	pp.setPriceDate(invoiceDate);
+	pp.setInvoiceLine(iline, null);
+	int M_PriceList_ID = invoice.getM_PriceList_ID();
+	pp.setM_PriceList_ID(M_PriceList_ID);
+	String sql = "SELECT plv.M_PriceList_Version_ID "
+			+ "FROM M_PriceList_Version plv "
+			+ "WHERE plv.M_PriceList_ID=? "						//	1
+			+ " AND plv.ValidFrom <= ? "
+			+ "ORDER BY plv.ValidFrom DESC";
+		//	Use newest price list - may not be future
+
+	int M_PriceList_Version_ID = DB.getSQLValueEx(null, sql, M_PriceList_ID, invoiceDate);
+	pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);
+	iline.setPriceList(pp.getPriceList());
+	iline.setPriceLimit(pp.getPriceLimit());
+	iline.setPriceActual(pp.getPriceStd());
+	iline.setPriceEntered(pp.getPriceStd());
+	iline.setC_UOM_ID(Integer.valueOf(pp.getC_UOM_ID()));
+	iline.set_ValueOfColumn("C_Currency_ID", Integer.valueOf(pp.getC_Currency_ID()));
+	
+}
+@AfterReactivate
+public boolean AfterReActivateIt() {
+	ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_REACTIVATE);
+	
+	setDocStatus(STATUS_Drafted);
+	System.out.println(getDocStatus());
+			
+	return true;
+}
+	
 }

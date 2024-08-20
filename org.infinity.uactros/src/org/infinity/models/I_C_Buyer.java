@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_Buyer
  *  @author iDempiere (generated) 
- *  @version Release 12
+ *  @version Release 11
  */
 @SuppressWarnings("all")
 public interface I_C_Buyer 
@@ -104,21 +104,6 @@ public interface I_C_Buyer
 	  * Birthday or Anniversary day
 	  */
 	public Timestamp getBirthday();
-
-    /** Column name C_BPartner_ID */
-    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
-
-	/** Set Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public void setC_BPartner_ID (int C_BPartner_ID);
-
-	/** Get Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID();
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name C_Buyer_ID */
     public static final String COLUMNNAME_C_Buyer_ID = "C_Buyer_ID";
@@ -464,4 +449,17 @@ public interface I_C_Buyer
 
 	/** Get User Address 2	  */
 	public String getUserAddress2();
+
+    /** Column name UserID */
+    public static final String COLUMNNAME_UserID = "UserID";
+
+	/** Set User ID.
+	  * User ID or account number
+	  */
+	public void setUserID (int UserID);
+
+	/** Get User ID.
+	  * User ID or account number
+	  */
+	public int getUserID();
 }
