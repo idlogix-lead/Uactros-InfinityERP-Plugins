@@ -32,7 +32,6 @@ public class MBuyer extends X_C_Buyer {
     @Override
     protected boolean beforeSave(boolean newRecord) {
     	
-    	
     	if(newRecord)
     		setAD_User_ID(0);
     	
@@ -46,7 +45,6 @@ public class MBuyer extends X_C_Buyer {
             throw new AdempiereException("National Code is required");
         }
 
-       
         MUser user = null;
         if(getAD_User_ID()>0)
         	user = new MUser(this.getCtx(), getAD_User_ID(), this.get_TrxName());
@@ -63,8 +61,6 @@ public class MBuyer extends X_C_Buyer {
             user.setAD_Image_ID(getAD_Image_ID());
             user.saveEx();
             setAD_User_ID(user.getAD_User_ID());
-           
-        
 
         return super.beforeSave(newRecord);
     }
