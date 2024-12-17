@@ -4,9 +4,16 @@ Bundle-Name: Uactros
 Bundle-SymbolicName: org.infinity.uactros;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.infinity.models
+Import-Package: org.adempiere.webui,
+ org.compiere.apps,
+ org.zkoss.zul;version="9.6.4"
 Require-Bundle: org.adempiere.base;bundle-version="11.0.0",
  org.adempiere.plugin.utils;bundle-version="11.0.0",
- org.eclipse.core.runtime;bundle-version="3.26.100"
+ org.eclipse.core.runtime;bundle-version="3.26.100",
+ zk;bundle-version="9.6.4",
+ org.adempiere.ui.zk,
+ org.adempiere.ui,
+ zul
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.infinity.uactros
 Bundle-Activator: org.infinity.uactros.Activator
