@@ -15,6 +15,7 @@ import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
+import org.infinity.models.MSalesFormSchedule;
 
 public class OrderScheduleValidator implements ModelValidator {
 
@@ -50,16 +51,16 @@ public class OrderScheduleValidator implements ModelValidator {
 			}
 			int payScheduleID = ops.getC_PaySchedule_ID();
 			MOrder order = new MOrder(po.getCtx(), orderID, po.get_TrxName());
-			int projectID = order.getC_Project_ID();
-			if(projectID>0 && payScheduleID>0) {
-				MProject project = new MProject(po.getCtx(), projectID, po.get_TrxName());
-				Timestamp contractDate = project.getDateContract();
-				if(contractDate !=null) {//Contract date should not be null
-					MPaySchedule paySchedule = new MPaySchedule(po.getCtx(), payScheduleID, po.get_TrxName());
-					Timestamp dueDate = TimeUtil.addDays(contractDate, paySchedule.getNetDays());
-					ops.setDueDate (dueDate);
-					Timestamp discountDate = TimeUtil.addDays(contractDate, paySchedule.getDiscountDays());
-					ops.setDiscountDate (discountDate);
+			int salesform_id= order.get_ValueAsInt("SalesForm_ID");
+			if(payScheduleID>0) {
+				MSalesFormSchedule sfs= new Query(po.getCtx(), MSalesFormSchedule.Table_Name , "C_PaySchedule_ID=? AND SalesForm_ID=? ", po.get_TrxName())
+						.setParameters(payScheduleID,salesform_id).first();
+				
+				if(sfs!=null) {
+					ops.setDiscountDate(sfs.getDiscountDate());
+					ops.setDiscountDate(sfs.getDiscountDate());
+					ops.setDueAmt(sfs.getDueAmt());
+					ops.setDueDate(sfs.getDueDate());
 				}
 				
 			}

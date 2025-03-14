@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Resourceassignment
+Bundle-SymbolicName: com.idlogix.resourceassignment
+Bundle-Version: 1.0.0.qualifier
+Import-Package: org.infinity.models
+Require-Bundle: org.adempiere.base;bundle-version="11.0.0",
+ org.adempiere.plugin.utils;bundle-version="11.0.0"
+Service-Component: Resource.xml
+Bundle-Vendor: IDLOGIX
+Automatic-Module-Name: com.idlogix.resourceassignment
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-17

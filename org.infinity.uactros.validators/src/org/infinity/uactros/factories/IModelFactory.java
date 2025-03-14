@@ -5,6 +5,7 @@ import org.compiere.model.ModelValidator;
 import org.infinity.uactros.validators.AllocationPayScheduleValidator;
 import org.infinity.uactros.validators.OrderScheduleValidator;
 import org.infinity.uactros.validators.PaymentScheduleValidator;
+import org.infinity.uactros.validators.SalesFormBusinesPartnerValidator;
 import org.infinity.uactros.validators.SalesFormValidator;
 
 
@@ -22,7 +23,8 @@ public class IModelFactory implements IModelValidatorFactory {
 			return new OrderScheduleValidator();
 		if(className.equals("org.infinity.validators.AllocationPayScheduleValidator"))
 			return new AllocationPayScheduleValidator();
-			
+		if(className.equals("org.infinity.validators.SalesFormBusinesPartnerValidator"))
+			return new SalesFormBusinesPartnerValidator();	
 		return null;
 	}
 }
