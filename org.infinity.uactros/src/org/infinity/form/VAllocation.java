@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -70,7 +69,6 @@ import org.compiere.util.TrxRunnable;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
@@ -113,7 +111,7 @@ public class VAllocation extends Allocation
 	private int         i_payment = 7;
 	private boolean     m_calculating = false;
 //	private int         m_C_Project_ID = 0;
-//	private int         m_SalesForm_ID = 0;
+	private int         m_SalesForm_ID = 0;
 	private int         i_open = 6;
 	private int         i_discount = 7;
 	private int         i_writeOff = 8; 
@@ -136,8 +134,8 @@ public class VAllocation extends Allocation
 	private WTableDirEditor organizationPick;
 //	private Label ProjectLabel = new Label();
 //	private WTableDirEditor projectPick;
-//	private Label salesFormLabel = new Label();
-//	private WTableDirEditor salesFormPick;
+	private Label salesFormLabel = new Label();
+	private WTableDirEditor salesFormPick;
 	private int noOfColumn;
 	private Borderlayout infoPanel = new Borderlayout();
 	private Panel paymentPanel = new Panel();
@@ -205,7 +203,7 @@ public class VAllocation extends Allocation
 		allocCurrencyLabel.setText(".");		
 		organizationLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 //		ProjectLabel.setText(Msg.translate(Env.getCtx(), "C_Project_ID"));
-//		salesFormLabel.setText(Msg.translate(Env.getCtx(), "SalesForm_ID"));
+		salesFormLabel.setText(Msg.translate(Env.getCtx(), "SalesForm_ID"));
 		
 		North north = new North();
 		north.setBorder("none");
@@ -308,10 +306,10 @@ public class VAllocation extends Allocation
 //		row.appendCellChild(projectPick.getComponent(),1);
 //		projectPick.showMenu();
 //		
-//		row.appendCellChild(salesFormLabel.rightAlign());
-//	    ZKUpdateUtil.setHflex(salesFormPick.getComponent(), "true");
-//		row.appendCellChild(salesFormPick.getComponent(),1);
-//		salesFormPick.showMenu();
+		row.appendCellChild(salesFormLabel.rightAlign());
+	    ZKUpdateUtil.setHflex(salesFormPick.getComponent(), "true");
+		row.appendCellChild(salesFormPick.getComponent(),1);
+		salesFormPick.showMenu();
 		
 		row.appendCellChild(organizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
@@ -449,10 +447,10 @@ public class VAllocation extends Allocation
 //		projectPick = new WTableDirEditor("C_Project_ID", true, false, true, lookupOR);
 //		projectPick.addValueChangeListener(this);
 //
-//		AD_Column_ID =1000017;        
-//		MLookup lookupSF = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
-//		salesFormPick = new WTableDirEditor("SalesForm_ID", true, false, true, lookupSF);
-//		salesFormPick.addValueChangeListener(this);
+		AD_Column_ID =1000017;        
+		MLookup lookupSF = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
+		salesFormPick = new WTableDirEditor("SalesForm_ID", true, false, true, lookupSF);
+		salesFormPick.addValueChangeListener(this);
 		
 		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "AllocateStatus")));
 		ZKUpdateUtil.setVflex(statusBar, "min");
@@ -629,11 +627,11 @@ public class VAllocation extends Allocation
 //			projectPick.setValue(value);
 //			loadBPartner();
 //		}
-//		if (name.equals("SalesForm_ID"))
-//		{
-//			salesFormPick.setValue(value);
-//			loadBPartner();
-//		}
+		if (name.equals("SalesForm_ID"))
+		{
+			salesFormPick.setValue(value);
+			loadBPartner();
+		}
 		
 		//	Currency
 		else if (name.equals("C_Currency_ID"))
@@ -671,14 +669,14 @@ public class VAllocation extends Allocation
 //		} else {
 //		    m_C_Project_ID = 0; // Reset to zero if null
 //		}
-//
-//		if (salesFormPick.getValue() != null) {
-//		    m_SalesForm_ID = (int) salesFormPick.getValue();
-//		} else {
-//		    m_SalesForm_ID = 0; // Reset to zero if null
-//		}
+
+		if (salesFormPick.getValue() != null) {
+		    m_SalesForm_ID = (int) salesFormPick.getValue();
+		} else {
+		    m_SalesForm_ID = 0; // Reset to zero if null
+		}
 		
-		Vector<Vector<Object>> data = getPaymentData(multiCurrency.isSelected(), dateField.getValue(), (String)null);
+		Vector<Vector<Object>> data = getPaymentData(multiCurrency.isSelected(), dateField.getValue(), (String)null,m_SalesForm_ID);
 		Vector<String> columnNames = getPaymentColumnNames(multiCurrency.isSelected());
 		
 		paymentTable.clear();
@@ -692,7 +690,7 @@ public class VAllocation extends Allocation
 		
 //		String orderReferenceInputValue = invoicepayshedulelabel.getRawValue().toString().trim();
 		
-		data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), (String)null);
+		data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), (String)null,m_SalesForm_ID);
 		columnNames = getInvoiceColumnNames(multiCurrency.isSelected());
 		
 		invoiceTable.clear();
@@ -982,9 +980,9 @@ public class VAllocation extends Allocation
 	}  
 	
 	
-	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Timestamp date, String trxName)
+	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Timestamp date, String trxName,int salesformId)
 	{
-		return getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, trxName);
+		return getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, trxName,salesformId);
 	}
 
 	/**
@@ -1014,9 +1012,9 @@ public class VAllocation extends Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "InvoicePay Schedule"));
 
 //		columnNames.add(Msg.getMsg(Env.getCtx(), "Project"));
-//		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form"));
+		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form"));
 //		columnNames.add(Msg.getMsg(Env.getCtx(), "Project ID"));
-//		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form ID"));
+		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form ID"));
 		
 		return columnNames;
 	}
@@ -1040,10 +1038,10 @@ public class VAllocation extends Allocation
 		invoiceTable.setColumnClass(i++, BigDecimal.class, true);	
 		invoiceTable.setColumnClass(i++, Timestamp.class, true);	//	10-Conv Applied
 		invoiceTable.setColumnClass(i++, int.class, true); 
-//		invoiceTable.setColumnClass(i++, String.class, true);
+		invoiceTable.setColumnClass(i++, String.class, true);
 //		invoiceTable.setColumnClass(i++, String.class, true);
 //		invoiceTable.setColumnClass(i++, Integer.class, true);
-//		invoiceTable.setColumnClass(i++, Integer.class, true); 
+		invoiceTable.setColumnClass(i++, Integer.class, true); 
 		//  Table UI
 		invoiceTable.autoSize();
 	}
@@ -1071,13 +1069,13 @@ public class VAllocation extends Allocation
 			m_bpartnerCheck.add(key);
 		}
 	}
-	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Timestamp date, String trxName)
+	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Timestamp date, String trxName,int salesformId)
 	{		
-		return getUnAllocatedPaymentData(m_C_BPartner_ID, m_C_Currency_ID, isMultiCurrency, date, m_AD_Org_ID, trxName);
+		return getUnAllocatedPaymentData(m_C_BPartner_ID, m_C_Currency_ID, isMultiCurrency, date, m_AD_Org_ID, trxName,salesformId);
 	}
 	
 	public static Vector<Vector<Object>> getUnAllocatedPaymentData(int C_BPartner_ID, int C_Currency_ID, boolean isMultiCurrency, 
-			Timestamp date, int AD_Org_ID, String trxName)
+			Timestamp date, int AD_Org_ID, String trxName,int salesform_id )
 	{
 		if (C_Currency_ID==0)
 			C_Currency_ID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);   //  default
@@ -1089,14 +1087,14 @@ public class VAllocation extends Allocation
 		 */
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT p.DateTrx,p.DocumentNo,p.C_Payment_ID,"  //  1..3
-			+ "c.ISO_Code,p.PayAmt,"                            //  4..5
+			+ "c.ISO_Code,p.PayAmt, "                            //  4..5
 			+ "currencyConvertPayment(p.C_Payment_ID,?,null,?),"//  6   #1, #2
 			+ "currencyConvertPayment(p.C_Payment_ID,?,paymentAvailable(p.C_Payment_ID),?),"  //  7   #3, #4
-			+ "p.MultiplierAP "
+			+ "p.MultiplierAP,sf.form_no,p.salesform_id "
 			+ "FROM C_Payment_v p"		//	Corrected for AP/AR
 			+ " INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID) "
 //			+"LEFT JOIN C_Project pr ON (p.C_Project_ID = pr.C_Project_ID) "  // Join with C_Project
-//            +"LEFT JOIN SalesForm sf ON (p.SalesForm_ID = sf.SalesForm_ID) " 
+            +"LEFT JOIN SalesForm sf ON (p.SalesForm_ID = sf.SalesForm_ID) " 
 			+ "WHERE p.IsAllocated='N' AND p.Processed='Y'"
 			+ " AND p.C_Charge_ID IS NULL"		//	Prepayments OK
 			+ " AND p.C_BPartner_ID=?");                   		//      #5
@@ -1106,8 +1104,8 @@ public class VAllocation extends Allocation
 			sql.append(" AND p.AD_Org_ID=" + AD_Org_ID);
 //		if (c_project_id != 0 )
 //			sql.append(" AND p.C_Project_ID=" + c_project_id);
-//		if (salesform_id != 0 )
-//			sql.append(" AND p.SalesForm_ID=" + salesform_id);
+		if (salesform_id != 0 )
+			sql.append(" AND p.SalesForm_ID=" + salesform_id);
 		sql.append(" ORDER BY p.DateTrx,p.DocumentNo");
 		
 		// role security
@@ -1146,8 +1144,8 @@ public class VAllocation extends Allocation
 				line.add(available);				//  4/6-ConvOpen/Available
 				line.add(Env.ZERO);	
 //				line.add(rs.getString(9));//  5/7-Applied
-//				line.add(rs.getString(10));				//
-//				line.add(rs.getInt(11));
+				line.add(rs.getString(9));				//
+				line.add(rs.getInt(10));
 //				line.add(rs.getInt(12));
 				data.add(line);
 			}
@@ -1188,9 +1186,9 @@ public class VAllocation extends Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 
 //		columnNames.add(Msg.getMsg(Env.getCtx(), "Project"));
-//		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form"));
+		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form"));
 //		columnNames.add(Msg.getMsg(Env.getCtx(), "Project ID"));
-//		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form ID"));
+		columnNames.add(Msg.getMsg(Env.getCtx(), "Sales Form ID"));
 		
 		return columnNames;
 	}
@@ -1214,10 +1212,10 @@ public class VAllocation extends Allocation
 		paymentTable.setColumnClass(i++, BigDecimal.class, true);       //  5-ConvAmt
 		paymentTable.setColumnClass(i++, BigDecimal.class, true);       //  6-ConvOpen
 		paymentTable.setColumnClass(i++, BigDecimal.class, false);   //  7-Allocated
-//		paymentTable.setColumnClass(i++, String.class, true);
+		paymentTable.setColumnClass(i++, String.class, true);
 //		paymentTable.setColumnClass(i++, String.class, true);
 //		paymentTable.setColumnClass(i++, Integer.class, true);
-//		paymentTable.setColumnClass(i++, Integer.class, true); 
+		paymentTable.setColumnClass(i++, Integer.class, true); 
 				//
 		i_payment = isMultiCurrency ? 7 : 5;
 		
@@ -1232,7 +1230,7 @@ public class VAllocation extends Allocation
 	}
 	
 	public static Vector<Vector<Object>> getUnpaidInvoiceData(boolean isMultiCurrency, Timestamp date, int AD_Org_ID, int C_Currency_ID, 
-			int C_BPartner_ID, String trxName)
+			int C_BPartner_ID, String trxName,int salesform_id)
 	{
 		
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
@@ -1242,11 +1240,11 @@ public class VAllocation extends Allocation
 			+ "currencyConvertInvoice(i.C_Invoice_ID,?,invoiceOpen(i.C_Invoice_ID,C_InvoicePaySchedule_ID),?)*i.MultiplierAP, "  //  7   #3, #4  Converted Open
 			+ "currencyConvertInvoice(i.C_Invoice_ID"                               //  8       AllowedDiscount
 			+ ",?,invoiceDiscount(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID),i.DateInvoiced)*i.Multiplier*i.MultiplierAP,"               //  #5, #6
-			+ "i.MultiplierAP ,i.created, i.C_InvoicePaySchedule_ID "
+			+ "i.MultiplierAP ,i.created, i.C_InvoicePaySchedule_ID ,sf.form_no,i.salesform_id  "
 			+ "FROM C_Invoice_v i"		//  corrected for CM/Split
 			+ " INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID) "
 //			+"LEFT JOIN C_Project pr ON (i.C_Project_ID = pr.C_Project_ID) "  // Join with C_Project
-//            +"LEFT JOIN SalesForm sf ON (i.SalesForm_ID = sf.SalesForm_ID) " 
+			+"LEFT JOIN SalesForm sf ON (i.SalesForm_ID = sf.SalesForm_ID) " 
 			+ "WHERE i.IsPaid='N' AND i.Processed='Y'"
 			+ " AND i.C_BPartner_ID=?");                                            //  #7
 		if (!isMultiCurrency)
@@ -1255,8 +1253,8 @@ public class VAllocation extends Allocation
 			sql.append(" AND i.AD_Org_ID=" + AD_Org_ID);
 //		if (c_project_id != 0 )
 //			sql.append(" AND p.C_Project_ID=" + c_project_id);
-//		if (salesform_id != 0 )
-//			sql.append(" AND p.SalesForm_ID=" + salesform_id);
+		if (salesform_id != 0 )
+			sql.append(" AND i.SalesForm_ID=" + salesform_id);
 		
 			
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
@@ -1305,8 +1303,8 @@ public class VAllocation extends Allocation
 				line.add(rs.getTimestamp(10));
 				line.add(rs.getInt(11));  
 //				line.add(rs.getString(12));//  5/7-Applied
-//				line.add(rs.getString(13));				//
-//				line.add(rs.getInt(14));
+				line.add(rs.getString(12));				//
+				line.add(rs.getInt(13));
 //				line.add(rs.getInt(15));//  8/10-OverUnder
 
 				//	Add when open <> 0 (i.e. not if no conversion rate)
@@ -1445,7 +1443,7 @@ public class VAllocation extends Allocation
 						aLine.setDocInfo(C_BPartner_ID, C_Order_ID, C_Invoice_ID);
 						aLine.setPaymentInfo(C_Payment_ID, C_CashLine_ID);
 						if(C_InvoicePayShedule_ID>0)
-							aLine.set_ValueOfColumn("C_InvoicePayShedule_ID", C_InvoicePayShedule_ID);
+							aLine.set_ValueOfColumn("C_InvoicePaySchedule_ID", C_InvoicePayShedule_ID);
 						aLine.saveEx();
 
 						//  Apply Discounts and WriteOff only first time
@@ -1492,6 +1490,7 @@ public class VAllocation extends Allocation
 				Env.ZERO, Env.ZERO, Env.ZERO);
 			aLine.setDocInfo(C_BPartner_ID, 0, 0);
 			aLine.setPaymentInfo(C_Payment_ID, 0);
+			
 			aLine.saveEx();
 			unmatchedApplied = unmatchedApplied.subtract(payAmt);
 		}		
